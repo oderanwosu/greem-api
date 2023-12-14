@@ -1,11 +1,18 @@
 {
   "name": "greem-api",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.0.1",
+  "description": "Greem is a live messaging application that utilizes sentiment analysis to assist users in grasping the tone of their conversations. With Greem, users can send text, images, gifs, and code snippets, enhancing communication through various forms of media.",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "ISC"
+  "author": "Odera Nwosu",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
 }
