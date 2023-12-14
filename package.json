@@ -5,8 +5,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npx tsc & node dist/index.js"
+    "test": "npx tsc & node test/auth_server_test.js",
+    "start": "tsc && node dist/index.js"
   },
   "author": "Odera Nwosu",
   "license": "ISC",
