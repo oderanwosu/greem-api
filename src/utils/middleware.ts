@@ -1,11 +1,15 @@
 import { NextFunction, Response } from "express";
 import { Request } from "express-validator/src/base.js";
 import jwt, { Jwt } from "jsonwebtoken";
-import { APIError } from "../routes/auth_routes.js";
+import { APIError, AuthenticatedResponse } from "./interfaces.js";
+import { validationResult } from "express-validator";
+import bodyParser from "body-parser";
+import helmet from "helmet";
+import cors from "cors";
 
 export const authenticateAccessToken = async (
   req: Request,
-  res: Response,
+  res: AuthenticatedResponse,
   nex: NextFunction
 ) => {
   try {
@@ -39,6 +43,8 @@ export const authenticateAccessToken = async (
             payload: "the token provided is invalid or expired",
             code: 403,
           };
+
+        res.authUser = { id: authUser.id, email: authUser.email };
       }
     );
     nex();
@@ -48,4 +54,23 @@ export const authenticateAccessToken = async (
     res.statusCode = knownError.code || 500;
     res.send(knownError);
   }
+};
+
+export const validate = async (req: Request, res: any, nex: any) => {
+  const validationErrors = validationResult(req);
+
+  if (!validationErrors.isEmpty()) {
+    res.send({
+      error: "validation",
+      code: 422,
+      payload: validationErrors.array(),
+    });
+  }
+};
+
+export const applyMiddleWareConfigurations = (app: any) => {
+  app.use(bodyParser.json({ limit: "30mb" }));
+  app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
+  app.use(cors());
+  return app
 };

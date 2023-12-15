@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "test": "npx tsc & node test/auth_server_test.js",
-    "start": "tsc && node dist/index.js"
+    "start": "tsc && node dist/server.js"
   },
   "author": "Odera Nwosu",
   "license": "ISC",

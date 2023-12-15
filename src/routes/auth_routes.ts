@@ -6,18 +6,15 @@ import {
   createAuthenticationUser,
   deleteRefreshTokenFromDatabase,
   getAuthenticationUserFromEmail,
-} from "../services/firestore_services.js";
+} from "../services/auth_firestore_services.js";
 import { uuidv4 } from "@firebase/util";
 import { compare, hash } from "bcrypt";
 import { generateAccessToken, generateRefreshToken } from "../utils/tokens.js";
 import { authenticateAccessToken } from "../utils/middleware.js";
+import { APIError } from "../utils/interfaces.js";
 let _router = Router();
 
-export interface APIError {
-  error: string;
-  code: number;
-  payload: any;
-}
+
 
 const registerValidators = [
   body("email").isEmail(),
@@ -48,7 +45,7 @@ _router.post(
         throw {
           error: "validation",
           code: 422,
-          payload: "Email already exist.",
+          payload: "User with email already exist.",
         };
       }
 
