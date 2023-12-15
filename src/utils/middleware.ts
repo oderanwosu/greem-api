@@ -59,13 +59,13 @@ export const authenticateAccessToken = async (
 export const validate = async (req: Request, res: any, nex: any) => {
   const validationErrors = validationResult(req);
 
-  if (!validationErrors.isEmpty()) {
+  if (!validationErrors.isEmpty()) 
     res.send({
       error: "validation",
       code: 422,
       payload: validationErrors.array(),
     });
-  }
+   else nex()
 };
 
 export const applyMiddleWareConfigurations = (app: any) => {

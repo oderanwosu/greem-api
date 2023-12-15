@@ -32,7 +32,7 @@ export const firebaseService = initializeDatabase();
 
 
 authApp.use("/", authRoutes);
-mainApp.use("/api/", profileRoutes)
+mainApp.use("/api/profile", profileRoutes)
 
 export const authServer = authApp.listen(
   process.env.AUTH_SERVER_PORT,
