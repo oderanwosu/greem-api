@@ -2,6 +2,8 @@ import {
   SnapshotOptions,
   addDoc,
   collection,
+  deleteDoc,
+  doc,
   getDocs,
   getFirestore,
   query,
@@ -18,16 +20,18 @@ import { authUserRef, db, firebaseApp } from "../index.js";
  * @description Creates an authentication user inside of the Firebase Firestore.
  */
 export async function createAuthenticationUser(
-  id: String,
-  email: String,
-  hashedPassword: String
+  id: string,
+  email: string,
+  hashedPassword: string
 ): Promise<void> {
   try {
-    const docRef = await addDoc(authUserRef, {
+    const docRef = await addDoc(collection(db, "auth_users",), {
       id: id,
       email: email,
       password: hashedPassword,
     });
+
+    
 
     console.log("Authentication User Created! - ", docRef.id);
   } catch (e) {
@@ -47,10 +51,10 @@ export async function createAuthenticationUser(
  */
 export async function getAuthenticationUserFromEmail(email: string) {
   try {
-    const q = query(authUserRef, where("email", "==", email));
+    const q = query(collection(db, "auth_users"), where("email", "==", email));
     const querySnapshot = await getDocs(q);
 
-    return querySnapshot.docs[0].data();
+    return querySnapshot.docs[0] != undefined ? querySnapshot.docs[0].data() : null
   } catch (e) {
     console.error("Error adding document: ", e);
     throw {
@@ -63,14 +67,36 @@ export async function getAuthenticationUserFromEmail(email: string) {
 
 /**
  *
- * @param email Email that will be checked.
- * @description Checks if the passed email is already in use.
+ * @param refreshToken 
+ * @description Adds a refresh token to the database.
  */
 export async function addRefreshTokenToDatabase(refreshToken: string): Promise<void> {
   try {
     const docRef = await addDoc(collection(db, "refresh_tokens"), {
       refreshToken: refreshToken,
     });
+  } catch (e) {
+    console.error("Error adding document: ", e);
+    throw {
+      error: "database",
+      code: 500,
+      payload: "Error when retrieving data from Database",
+    };
+  }
+}
+
+/**
+ *
+ * @param refreshToken
+ * @description Deletes the refresh token from the database.
+ */
+export async function deleteRefreshTokenFromDatabase(refreshToken: string): Promise<void> {
+  try {
+    
+    const q = query(collection(db, "refresh_tokens"), where("refreshToken", "==", refreshToken));
+    const querySnapshot = await getDocs(q)
+
+    await deleteDoc(querySnapshot.docs[0].ref)
   } catch (e) {
     console.error("Error adding document: ", e);
     throw {

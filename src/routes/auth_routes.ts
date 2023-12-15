@@ -4,14 +4,16 @@ import { body, validationResult } from "express-validator";
 import {
   addRefreshTokenToDatabase,
   createAuthenticationUser,
+  deleteRefreshTokenFromDatabase,
   getAuthenticationUserFromEmail,
 } from "../services/firestore_services.js";
 import { uuidv4 } from "@firebase/util";
 import { compare, hash } from "bcrypt";
 import { generateAccessToken, generateRefreshToken } from "../utils/tokens.js";
+import { authenticateAccessToken } from "../utils/middleware.js";
 let _router = Router();
 
-interface APIError {
+export interface APIError {
   error: string;
   code: number;
   payload: any;
@@ -42,7 +44,7 @@ _router.post(
 
       let data = req.body;
       //Checks if email already exist in database.
-      if ((await getAuthenticationUserFromEmail(data.email)).length > 0) {
+      if ((await getAuthenticationUserFromEmail(data.email)) != null) {
         throw {
           error: "validation",
           code: 422,
@@ -54,11 +56,12 @@ _router.post(
       await createAuthenticationUser(
         uuidv4(),
         data.email,
-        await hash(data.password, process.env.HASH_SALT!)
+        await hash(data.password, Number.parseInt(process.env.HASH_SALT!))
       );
 
       res.sendStatus(201);
     } catch (err: unknown) {
+      console.log(err);
       const knownError = err as APIError;
       res.statusCode = knownError.code || 500;
       res.send(knownError);
@@ -126,5 +129,34 @@ _router.post("/login", loginValidators, async (req: Request, res: Response) => {
     res.send(knownError);
   }
 });
+
+_router.delete(
+  "/logout",
+  authenticateAccessToken,
+  [body("refreshToken").isJWT()],
+  async (req: Request, res: Response) => {
+    try {
+      const validationErrors = validationResult(req);
+
+      if (!validationErrors.isEmpty()) {
+        throw {
+          error: "validation",
+          code: 422,
+          payload: validationErrors.array(),
+        };
+      }
+
+      await deleteRefreshTokenFromDatabase(req.body.refreshToken);
+      res.sendStatus(204);
+    } catch (err) {
+      console.log(err)
+      const knownError = err as APIError;
+      res.statusCode = knownError.code || 500;
+      res.send(knownError);
+    }
+  }
+);
+
+
 
 export const authRoutes = _router;
