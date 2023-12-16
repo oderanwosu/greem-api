@@ -4,11 +4,13 @@ import {
   getDocs,
   getFirestore,
   query,
+  setDoc,
+  updateDoc,
   where,
 } from "firebase/firestore";
 import { uuidv4 } from "@firebase/util";
 import { initializeApp } from "firebase/app";
-import { DatabaseService } from "../utils/interfaces.js";
+import { AnyObject, DatabaseService, UserProfile } from "../utils/interfaces.js";
 import { firebaseService } from "../server.js";
 
 export function initializeDatabase(): DatabaseService {
@@ -46,11 +48,32 @@ export async function getUserProfileByID(id: string) {
     };
   }
 }
+
+export async function getUserProfileByProfileID(id: string) {
+  try {
+    const q = query(
+      collection(firebaseService.database, "user_profiles"),
+      where("data.id", "==", id)
+    );
+
+    const querySnapshot = await getDocs(q);
+
+    return querySnapshot.docs.length > 0 ? querySnapshot.docs[0].data() : null;
+  } catch (error) {
+    console.error("Error adding document: ", error);
+    throw {
+      error: "database",
+      code: 500,
+      payload: "Error when retrieving data from Database",
+    };
+  }
+}
+
 export async function getUserProfileByUsername(username: string) {
   try {
     const q = query(
       collection(firebaseService.database, "user_profiles"),
-      where("username", "==", username)
+      where("data.username", "==", username)
     );
 
     const querySnapshot = await getDocs(q);
@@ -79,13 +102,54 @@ export async function createUserProfile(
         isEmailPublic: false,
         isActivityPublic: true,
         isDOBPublic: false,
-        profileID: uuidv4(),
-        data: { id: id, email: email, username: username, dob: dob, active: false },
+        authID: id,
+        profile: {
+          profileID: uuidv4(),
+          email: email,
+          username: username,
+          dob: dob,
+          active: false,
+        },
         createdAt: new Date().toUTCString(),
       }
-
     );
   } catch (error) {
+    throw {
+      error: "database",
+      code: 500,
+      payload: "Error when retrieving data from Database",
+    };
+  }
+}
+
+export async function updateUserProfile(
+  authID: string,
+  options: {
+    username: string;
+    biography: string;
+    isActivityPublic: boolean;
+    isDOBPublic: boolean;
+    isEmailPublic: boolean;
+  }
+) {
+  try {
+    const q = query(
+      collection(firebaseService.database, "user_profiles"),
+      where("authID", "==", authID)
+    );
+    const querySnapshot = await getDocs(q);
+
+    var data = querySnapshot.docs[0].data()
+    
+    data.profile.username = options.username || data.profile.username
+    data.isActivityPublic = options.isActivityPublic || data.isActivityPublic
+    data.isDOBPublic = options.isDOBPublic || data.isDOBPublic
+    data.isEmailPublic = options.isEmailPublic || data.isEmailPublic
+      console.log(data)
+    await setDoc(querySnapshot.docs[0].ref, data)
+
+  } catch (error) {
+    console.log(error);
     throw {
       error: "database",
       code: 500,
