@@ -130,7 +130,7 @@ _router.post("/login", loginValidators, async (req: Request, res: Response) => {
 _router.delete(
   "/logout",
   authenticateAccessToken,
-  [body("refreshToken").isJWT()],
+  [body("refreshToken").isJWT() /** Ensure the body contains a refreshToken that is token */],
   async (req: Request, res: Response) => {
     try {
       const validationErrors = validationResult(req);
@@ -142,7 +142,7 @@ _router.delete(
           payload: validationErrors.array(),
         };
       }
-
+      //Delete the refreshToken from the database. Doing so, ddisables the user from authenticating again once their accessToken is gone. 
       await deleteRefreshTokenFromDatabase(req.body.refreshToken);
       res.sendStatus(204);
     } catch (err) {

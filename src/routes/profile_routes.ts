@@ -106,7 +106,7 @@ _router.post(
   async (req: Request, res: AuthenticatedResponse) => {
     try {
       let changes = req.body;
-      console.log(changes)
+      console.log(changes);
       updateUserProfile(res.authUser!.id, {
         username: changes.username,
         biography: changes.biography,
@@ -124,9 +124,5 @@ _router.post(
     }
   }
 );
-
-
-
-
 
 export const profileRoutes = _router;

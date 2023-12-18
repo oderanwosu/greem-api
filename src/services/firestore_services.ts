@@ -13,6 +13,10 @@ import { initializeApp } from "firebase/app";
 import { AnyObject, DatabaseService, UserProfile } from "../utils/interfaces.js";
 import { firebaseService } from "../server.js";
 
+/**
+ * 
+ * @returns An interface containing all neccesary Firebase service access points.
+ */
 export function initializeDatabase(): DatabaseService {
   // Initialize Firebase
   const firebaseConfig = {

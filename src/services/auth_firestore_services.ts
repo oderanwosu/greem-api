@@ -1,4 +1,5 @@
 import {
+  DocumentData,
   SnapshotOptions,
   addDoc,
   collection,
@@ -10,9 +11,6 @@ import {
   where,
 } from "firebase/firestore";
 import { firebaseService } from "../server.js";
-
-
-// Initialize Cloud Firestore and get a reference to the service
 
 /**
  *
@@ -47,12 +45,13 @@ export async function createAuthenticationUser(
 
 /**
  *
- * @param email Email that will be checked.
- * @description Checks if the passed email is already in use.
+ * @param targetEmail A string of the target email.
+ * @description Gets the target email from the initialized database Auth Users. 
+ * @returns If there exist an email in the database containing the target email it will be returned. Else null will be sent.
  */
-export async function getAuthenticationUserFromEmail(email: string) {
+export async function getAuthenticationUserFromEmail(targetEmail: string): Promise<DocumentData | null> {
   try {
-    const q = query(collection(firebaseService.database, "auth_users"), where("email", "==", email));
+    const q = query(collection(firebaseService.database, "auth_users"), where("email", "==", targetEmail));
     const querySnapshot = await getDocs(q);
 
     return querySnapshot.docs[0] != undefined ? querySnapshot.docs[0].data() : null
